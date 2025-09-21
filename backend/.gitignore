@@ -1,0 +1,7 @@
+__mocks__
+__tests__
+
+node_modules/
+
+.env
+

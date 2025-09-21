@@ -1,16 +1,39 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import authRoutes from "./routes/auth.js";
-import repoRoutes from "./routes/repo.js";
 
-dotenv.config();
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 const app = express();
+const port = process.env.PORT || 5000;
+
+app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI).then(() => console.log("DB Connected"));
+const uri = process.env.ATLAS_URI;
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const connection = mongoose.connection;
+connection.once('open', () => {
+  console.log("MongoDB database connection established successfully");
+})
 
-app.use("/auth", authRoutes);
-app.use("/repo", repoRoutes);
+const auth = require('./middleware/auth');
+const usersRouter = require('./routes/users')(auth);
 
-app.listen(5000, () => console.log("Server running on 5000"));
+const repositoriesRouter = require('./routes/repositories')(auth);
+
+const feedRouter = require('./routes/feed')(auth);
+
+const searchRouter = require('./routes/search');
+
+const recommendationsRouter = require('./routes/recommendations')(auth);
+
+app.use('/users', usersRouter);
+app.use('/repositories', repositoriesRouter);
+app.use('/feed', feedRouter);
+app.use('/search', searchRouter);
+app.use('/recommendations', recommendationsRouter);
+
+app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`);
+});

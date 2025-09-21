@@ -1,11 +1,3 @@
-/* You can remove this and use Tailwind later */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f8f9fa;
-}
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
