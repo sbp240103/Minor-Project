@@ -34,6 +34,10 @@ app.use('/feed', feedRouter);
 app.use('/search', searchRouter);
 app.use('/recommendations', recommendationsRouter);
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Backend is healthy 🚀' });
+});
+
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });

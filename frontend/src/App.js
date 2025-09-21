@@ -1,6 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import UploadRepository from './pages/UploadRepository';
+import Feed from './pages/Feed';
+import Trending from './pages/Trending';
+import Search from './pages/Search';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
