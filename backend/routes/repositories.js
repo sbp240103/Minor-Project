@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const Repository = require('../models/repository.model');
-const { generateSummary, extractTechStack, generateEmbeddings } = require('../services/gemini.service');
+const repositoryController = require('../controllers/repository.controller');
 const fs = require('fs');
 
 module.exports = (auth) => {
@@ -16,35 +16,7 @@ module.exports = (auth) => {
 
   const upload = multer({ storage });
 
-  router.post('/', auth, upload.array('files'), async (req, res) => {
-    try {
-      const { name, description } = req.body;
-      const owner = req.user;
-
-      const files = req.files.map((file) => file.path);
-
-      const fileContents = files.map((file) => fs.readFileSync(file, 'utf-8'));
-
-      const summary = await generateSummary(fileContents);
-      const techStack = await extractTechStack(fileContents);
-      const summaryEmbedding = await generateEmbeddings(summary);
-
-      const newRepository = new Repository({
-        owner,
-        name,
-        description,
-        files,
-        summary,
-        techStack,
-        summaryEmbedding,
-      });
-
-      const savedRepository = await newRepository.save();
-      res.json(savedRepository);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+  router.post('/', auth, repositoryController.createRepository);
 
   router.get('/', async (req, res) => {
     try {
@@ -64,17 +36,20 @@ module.exports = (auth) => {
     }
   });
 
-  // Get trending repositories
+  // Get trending repositories: recommend repos of profiles with highest followers
   router.route('/trending').get(async (req, res) => {
     try {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-      const repositories = await Repository.find({ createdAt: { $gte: sevenDaysAgo } })
-        .sort({ likes: -1 })
-        .limit(10)
-        .populate('owner', 'username');
-
+      const User = require('../models/user.model');
+      // Find users sorted by followers count (desc)
+      const topUsers = await User.find().sort({ 'followers': -1 }).limit(10);
+      const topUserIds = topUsers.map(u => u._id);
+      // Find repositories owned by these users
+      const repositories = await Repository.find({ owner: { $in: topUserIds } })
+        .populate('owner', 'username')
+        .exec();
+      // Sort repositories by owner's followers count (desc)
+      const userFollowersMap = Object.fromEntries(topUsers.map(u => [u._id.toString(), u.followers.length]));
+      repositories.sort((a, b) => (userFollowersMap[b.owner._id.toString()] || 0) - (userFollowersMap[a.owner._id.toString()] || 0));
       res.json(repositories);
     } catch (err) {
       res.status(500).json({ error: err.message });

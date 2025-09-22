@@ -68,6 +68,17 @@ module.exports = (auth) => {
     }
   });
 
+  // Get all repositories for a user
+  router.route('/:id/repositories').get(async (req, res) => {
+    try {
+      const Repository = require('../models/repository.model');
+      const repos = await Repository.find({ owner: req.params.id });
+      res.json(repos);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // Follow a user
   router.route('/follow/:id').post(auth, async (req, res) => {
     try {

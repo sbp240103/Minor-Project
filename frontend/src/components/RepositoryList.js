@@ -12,7 +12,8 @@ const RepositoryList = ({ repositories }) => {
             <Link to={`/repository/${repo._id}`}>{repo.name}</Link>
           </h3>
           <p className="text-gray-600">by {repo.owner.username}</p>
-          <p>{repo.description}</p>
+          <p className="text-sm text-purple-700">Followers: {repo.owner?.followers?.length || 0}</p>
+          <p>{repo.summary || repo.description}</p>
         </div>
       ))}
     </div>

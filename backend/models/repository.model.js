@@ -22,6 +22,10 @@ const repositorySchema = new mongoose.Schema({
   files: [{
     type: String
   }],
+  githubRepo: {
+    type: String,
+    trim: true
+  },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

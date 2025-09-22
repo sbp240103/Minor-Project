@@ -26,7 +26,7 @@ const feedRouter = require('./routes/feed')(auth);
 
 const searchRouter = require('./routes/search');
 
-const recommendationsRouter = require('./routes/recommendations')(auth);
+const recommendationsRouter = require('./routes/recommendations');
 
 app.use('/users', usersRouter);
 app.use('/repositories', repositoriesRouter);
